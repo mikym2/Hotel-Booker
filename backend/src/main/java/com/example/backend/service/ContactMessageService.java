@@ -1,8 +1,7 @@
 package com.example.backend.service;
 
-import com.example.backend.JPA.Entities.ContactMessage;
-import com.example.backend.JPA.Entities.ContactMessageRepository;
-import org.springframework.boot.data.metrics.DefaultRepositoryTagsProvider;
+import com.example.backend.JPA.entities.ContactMessage;
+import com.example.backend.JPA.repo.ContactMessageRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.example.backend.JPA.Entities;
+package com.example.backend.JPA.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;

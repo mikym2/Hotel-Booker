@@ -1,5 +1,6 @@
-package com.example.backend.JPA.Entities;
+package com.example.backend.JPA.repo;
 
+import com.example.backend.JPA.entities.ContactMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

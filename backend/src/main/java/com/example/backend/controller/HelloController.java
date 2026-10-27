@@ -1,6 +1,6 @@
-package com.example.backend.Controller;
+package com.example.backend.controller;
 
-import com.example.backend.JPA.Entities.ContactMessage;
+import com.example.backend.JPA.entities.ContactMessage;
 import com.example.backend.service.ContactMessageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
