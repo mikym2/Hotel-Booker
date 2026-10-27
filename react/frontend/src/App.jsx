@@ -1,18 +1,43 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function App() {
   const [name, setName] = useState('')
   const [message, setMessage] = useState('')
-  const [response, setResponse] = useState('')
-  const [error, setError] = useState('')
+  const [contacts, setContacts] = useState([])
   const [loading, setLoading] = useState(false)
+  const [loadingContacts, setLoadingContacts] = useState(true)
+  const [error, setError] = useState('')
+  const [response, setResponse] = useState('')
+
+  async function loadContacts() {
+    setLoadingContacts(true)
+
+    try {
+      const result = await fetch('/api/contacts')
+
+      if (!result.ok) {
+        throw new Error('Could not load messages.')
+      }
+
+      const data = await result.json()
+      setContacts(data)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoadingContacts(false)
+    }
+  }
+
+  useEffect(() => {
+    loadContacts()
+  }, [])
 
   async function handleSubmit(event) {
     event.preventDefault()
 
-    setResponse('')
     setError('')
+    setResponse('')
     setLoading(true)
 
     try {
@@ -21,23 +46,22 @@ function App() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          name: name,
-          message: message
-        })
+        body: JSON.stringify({ name, message })
       })
 
       const data = await result.json()
 
       if (!result.ok) {
-        throw new Error(data.error || 'Request failed')
+        throw new Error(data.error || 'Submission failed.')
       }
 
       setResponse(data.message)
       setName('')
       setMessage('')
+
+      await loadContacts()
     } catch (err) {
-      setError(err.message || 'Could not contact the server.')
+      setError(err.message)
     } finally {
       setLoading(false)
     }
@@ -54,7 +78,7 @@ function App() {
           <input
             id="name"
             value={name}
-            onChange={(event) => setName(event.target.value)}
+            onChange={e => setName(e.target.value)}
             required
           />
         </div>
@@ -67,7 +91,7 @@ function App() {
           <textarea
             id="message"
             value={message}
-            onChange={(event) => setMessage(event.target.value)}
+            onChange={e => setMessage(e.target.value)}
             required
           />
         </div>
@@ -79,8 +103,27 @@ function App() {
         </button>
       </form>
 
-      {response && <p>{response}</p>}
+      {response && <p role="status">{response}</p>}
       {error && <p role="alert">Error: {error}</p>}
+
+      <hr />
+
+      <h2>Saved Messages</h2>
+
+      {loadingContacts && <p>Loading messages...</p>}
+
+      {!loadingContacts && contacts.length === 0 && (
+        <p>No messages yet.</p>
+      )}
+
+      <ul>
+        {contacts.map(contact => (
+          <li key={contact.id}>
+            <strong>{contact.name}</strong>
+            <p>{contact.message}</p>
+          </li>
+        ))}
+      </ul>
     </main>
   )
 }
