@@ -15,7 +15,7 @@ jobs:
                 image: postgres:16
                 env:
                     POSTGRES_USER: postgres
-                    POSTGRES_PASSWORD: Test@1234
+                    POSTGRES_PASSWORD: postgres
                     POSTGRES_DB: website_test_db
                 ports:
                     - 5432:5432
@@ -45,4 +45,4 @@ jobs:
               env:
                 Test_DB_URL: jdbc:postgresql://localhost:5432/website_test_db
                 DB_USERNAME: postgres
-                DB_PASSWORD: Test@1234
+                DB_PASSWORD: postgres
