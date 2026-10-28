@@ -29,7 +29,7 @@ public class HelloController {
 
     @PostMapping("/contact")
     //@RequestBody tells Spring to convert the incoming JSON into a Java object.
-    //@Valid tells Spring to check specified rules in the ContactRequestrecord when it receives the request
+    //@Valid tells Spring to check specified rules in the ContactRequest record when it receives the request
     public ContactResponse submitContact(@Valid @RequestBody ContactRequest request){
 
         ContactMessage saved = contactMessageService.create(request.name(), request.message());
@@ -66,8 +66,8 @@ public class HelloController {
 
         /**
          * @ExceptionHandler(IllegalArgumentException.class) handles IllegalArgumentExceptions,
-         *      * and @ResponseStatus(HttpStatus.BAD_REQUEST) makes the response use HTTP status 400 Bad Request.
-         *      * The returned ErrorResponse record is serialized as JSON, for example:
+         * and @ResponseStatus(HttpStatus.BAD_REQUEST) makes the response use HTTP status 400 Bad Request.
+         * The returned ErrorResponse record is serialized as JSON, for example:
          * */
         @ExceptionHandler(IllegalArgumentException.class)
         @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -75,6 +75,36 @@ public class HelloController {
             return new ErrorResponse(exception.getMessage());
         }
 
+        /**
+        *
+         * Step 1: exception.getBindingResult()
+         *Retrieves the validation results, including information about fields that failed validation.
+         *
+         * Step 2: .getFieldErrors()
+         *Retrieves the errors associated with individual fields.
+         *For example:
+         * - name → "Name is required."
+         * - email → "Email must be valid."
+         *
+         *
+         * Step 3: .stream()
+         *Converts the list of errors into a Java Stream so you can process them using operations such as filter, map, and findFirst.
+         *
+         *
+         * Step 4: .findFirst()
+         *Selects the first error in the stream.
+         *The result is an Optional because the stream might be empty.
+         *
+         *
+         * Step 5: .map(error -> error.getDefaultMessage())
+         *If an error exists, extracts its validation message.
+         *For example, it extracts "Email must be valid." from the error object.
+         *
+         *
+         * Step 6: .orElse("Invalid request.")
+         *If there is no error message available in the Optional, uses "Invalid request." as a fallback.
+        *
+        * */
         @ExceptionHandler(MethodArgumentNotValidException.class)
         @ResponseStatus(HttpStatus.BAD_REQUEST)
         public  ErrorResponse handleValidationError( MethodArgumentNotValidException exception){

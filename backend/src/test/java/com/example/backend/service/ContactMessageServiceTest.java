@@ -33,17 +33,24 @@ public class ContactMessageServiceTest {
     }
 
     @Test
-    void createValidMessageSavesIt(){
-        ContactMessage contact =
-                new ContactMessage("Alice","Hello!");
-
-        when(repository.save(any(ContactMessage.class))).thenReturn(contact);
+    void createValidMessageSavesIt() {
+        //return the first argument passed to the mocked method
+        when(repository.save(any(ContactMessage.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         ContactMessage result =
                 service.create("Alice", "Hello! ");
 
         assertEquals("Alice", result.getName());
         assertEquals("Hello!", result.getMessage());
+
+        //verifies that your service called repository.save() with a ContactMessage whose name is "Alice"
+        // and whose message is "Hello!".
+        //argThat() lets you define a condition that an argument must satisfy
+        verify(repository).save(argThat(contact ->
+                contact.getName().equals("Alice")
+                        && contact.getMessage().equals("Hello!")
+        ));
     }
 
     @Test
@@ -53,6 +60,32 @@ public class ContactMessageServiceTest {
                 () -> service.create("   ", "Hello!")
         );
         verifyNoInteractions(repository);
+    }
+
+    @Test
+    void createNullNameThrowsException(){
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.create(null,"Hello!")
+        );
+
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void createBlankMessageThrowsException(){
+        assertThrows(IllegalArgumentException.class,
+                () -> service.create("Alice", "")
+        );
+
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void createNullMessageThrowsException(){
+        assertThrows(IllegalArgumentException.class,
+                () -> service.create("Alice", null)
+        );
     }
 
     @Test

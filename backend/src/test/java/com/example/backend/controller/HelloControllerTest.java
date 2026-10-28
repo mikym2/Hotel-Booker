@@ -21,6 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(HelloController.ApiExceptionHandler.class)
 public class HelloControllerTest {
 
+    //MockMvc: A Spring class that allows you to simulate HTTP requests and inspect HTTP responses
+    //without starting a real HTTP server.
     @Autowired
     private MockMvc mockMvc;
 
@@ -55,7 +57,7 @@ public class HelloControllerTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message")
-                        .value("Message saved successfully! ID: null"));
+                        .value("Message received successfully Alice!"));
 
         verify(service).create("Alice", "Hello!");
     }
@@ -77,13 +79,10 @@ public class HelloControllerTest {
         verify(service).findAll();
     }
 
+    //we do not have a when clause here because it'll fail when it does the @valid aka even before it enters the logic
     @Test
-    void submitContactReturnsBadRequestWhenServiceRejectsInput()
+    void serviceContactWithBlankMessage()
             throws Exception {
-
-        when(service.create("Alice", ""))
-                .thenThrow(new IllegalArgumentException(
-                        "Message is required."));
 
         mockMvc.perform(post("/api/contact")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -96,6 +95,48 @@ public class HelloControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error")
                         .value("Message is required."));
+
+        verifyNoInteractions(service);
     }
 
+    @Test
+    void serviceContactWithBlankName() throws Exception{
+        when(service.create("", "This is Alice"))
+                .thenThrow(new IllegalArgumentException("Name is required."));
+
+        mockMvc.perform(post("/api/contact")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "name": "",
+                            "message": "This is Alice"
+                        }
+                        """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("Name is required."));
+
+        verifyNoInteractions(service);
+
+    }
+
+    @Test
+    void serviceContactWithLongName() throws Exception{
+        String longName = "A".repeat(101);
+
+        mockMvc.perform(post("/api/contact")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "name":"%s",
+                            "message": "This is a long name"
+                        }
+                        """.formatted(longName)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("Name cannot exceed 100 characters."));
+
+
+        verifyNoInteractions(service);
+    }
 }
